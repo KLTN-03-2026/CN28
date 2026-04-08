@@ -1,0 +1,13 @@
+.wrapper {
+  @apply mx-auto w-full px-[1.5rem] md:px-5 lg:px-[10rem];
+  &--lg {
+    @apply max-w-screen-lg;
+  }
+  &--md {
+    @apply max-w-screen-md;
+  }
+
+  &--full {
+    @apply max-w-unset px-0;
+  }
+}
