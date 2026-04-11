@@ -7,6 +7,8 @@ import { formatVnd } from "@/lib/utils";
 import { UserProfile } from "@/types/user";
 import { Transaction } from "@/types/transaction";
 import toast from "react-hot-toast";
+import Link from "next/link";
+import { Banknote, Wallet } from "lucide-react";
 
 export default function WalletView({ profile }: { profile: UserProfile }) {
   const [filterType, setFilterType] = useState<string>("");
@@ -24,24 +26,7 @@ export default function WalletView({ profile }: { profile: UserProfile }) {
     },
   });
 
-  const handleDeposit = async () => {
-    try {
-      const amount = prompt("Nhập số tiền bạn muốn nạp (VNĐ):", "100000");
-      if (!amount) return;
-      const numAmount = parseInt(amount);
-      if (isNaN(numAmount) || numAmount < 10000) {
-        toast.error("Số tiền nạp tối thiểu là 10.000 VNĐ");
-        return;
-      }
 
-      const res = await api.post("/api/payment/create-url", { amount: numAmount });
-      if (res.data.url) {
-        window.location.href = res.data.url;
-      }
-    } catch (err) {
-      toast.error("Không thể tạo link nạp tiền");
-    }
-  };
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,13 +62,13 @@ export default function WalletView({ profile }: { profile: UserProfile }) {
           <p className="text-slate-600 dark:text-slate-400 text-body mt-1">Quản lý số dư, nạp tiền và yêu cầu rút tiền.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={handleDeposit}
+          <Link
+            href="/dashboard/deposit"
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all"
           >
-            <span className="material-symbols-outlined">payments</span>
+            <Banknote />
             Nạp tiền
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -93,10 +78,10 @@ export default function WalletView({ profile }: { profile: UserProfile }) {
           <div className="bg-primary rounded-2xl p-6 text-white shadow-xl shadow-primary/20 relative overflow-hidden">
             <div className="relative z-10">
               <p className="text-smaller font-bold opacity-80 uppercase tracking-widest">Tổng số dư</p>
-              <h2 className="text-h3 font-bold mt-2">{formatVnd(Number(profile.balance))}</h2>
+              <h2 className="text-h5 font-bold mt-2">{formatVnd(Number(profile.balance))}</h2>
             </div>
             <div className="absolute -right-4 -bottom-4 opacity-10 blur-xl scale-150">
-              <span className="material-symbols-outlined text-[120px]">account_balance_wallet</span>
+              <Wallet className="text-[120px]" />
             </div>
           </div>
 

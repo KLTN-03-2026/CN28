@@ -6,13 +6,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import api from "@/lib/axios";
+import { Rocket, Bell } from "lucide-react";
 
 //types
 import { NavbarUserProfile } from "@/types/navbar";
 import { Notification } from "@/types/notification";
 
 //compoenents
-import ThemeToggle from "./ThemeToggle";
 import HeaderSearch from "./HeaderSearch";
 import HeaderCategoryNav from "./HeaderCategoryNav";
 import { useNotifications } from "@/components/providers/NotificationProvider";
@@ -85,31 +85,6 @@ export default function Navbar() {
     window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
   }, [pathname]);
 
-  // 2. Hàm đăng xuất
-  const handleLogout = () => {
-    Cookies.remove("access_token", { path: "/" });
-    setUser(null);
-    window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
-    router.push("/");
-    router.refresh();
-  };
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   return (
     <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10 dark:border-white/10 font-display">
       <div className="wrapper wrapper--lg">
@@ -119,9 +94,7 @@ export default function Navbar() {
             href="/"
             className="inline-flex! items-center gap-2 shrink-0 order-1"
           >
-            <span className="material-symbols-outlined text-primary dark:text-slate-100 text-h4">
-              rocket_launch
-            </span>
+            <Rocket className="text-primary dark:text-slate-100 text-h4" />
             <h1 className="text-h6 font-extrabold tracking-tight text-primary dark:text-slate-100">
               InvestPro
             </h1>
@@ -135,8 +108,6 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-3 md:gap-4 shrink-0 order-2 ml-auto md:ml-0 md:order-3">
-            <ThemeToggle />
-
             {isInitializing ? (
               /* --- SKELETON LOADER ĐỂ TRÁNH NHÁY GIAO DIỆN --- */
               <div className="flex items-center gap-4">
@@ -157,7 +128,7 @@ export default function Navbar() {
                     onClick={() => setIsNotifOpen(!isNotifOpen)}
                     className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer flex items-center justify-center text-slate-600 dark:text-slate-300"
                   >
-                    <span className="material-symbols-outlined">notifications</span>
+                    <Bell />
                     {unreadCount > 0 && (
                       <span className="absolute top-1 right-1.5 flex h-3 w-3">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -212,23 +183,13 @@ export default function Navbar() {
                   )}
                 </div>
 
-                {/* Balance Display (Always Visible) */}
-                <div className="hidden lg:flex flex-col items-end">
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500">
-                    Số dư
-                  </span>
-                  <span className="text-small font-bold text-green-600 dark:text-green-400">
-                    ${Number(user.balance).toLocaleString()}
-                  </span>
-                </div>
-
                 <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
 
                 {/* Profile Dropdown Container */}
-                <div className="relative" ref={menuRef}>
+                <div className="relative">
                   {/* Trigger: Profile Info */}
-                  <button
-                    onClick={toggleMenu}
+                  <Link
+                  href={user.role?.toLowerCase() === "admin" ? "/admin-dashboard" : "/dashboard"}
                     className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     {user.avatarUrl ? (
@@ -245,63 +206,7 @@ export default function Navbar() {
                     <span className="hidden sm:block text-small font-bold text-slate-700 dark:text-slate-200">
                       {user.fullName}
                     </span>
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {isMenuOpen && (
-                    <div className="absolute right-0 mt-2 min-w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-lg py-2 z-50">
-                      {/* Dashboard Link */}
-                      <Link
-                        href={user.role?.toLowerCase() === "admin" ? "/admin-dashboard" : "/dashboard"}
-                        className="flex items-center gap-3 px-4 py-2 text-small text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <span className="material-symbols-outlined text-body">
-                          dashboard
-                        </span>
-                        Dashboard
-                      </Link>
-
-                      {/* Settings Link */}
-                      <Link
-                        href="/settings"
-                        className="flex items-center gap-3 px-4 py-2 text-small text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <span className="material-symbols-outlined text-body">
-                          settings
-                        </span>
-                        Cài đặt
-                      </Link>
-
-                      <Link
-                        href="/transactions"
-                        className="flex items-center gap-3 px-4 py-2 text-small text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <span className="material-symbols-outlined text-body">
-                          receipt_long
-                        </span>
-                        Giao dịch
-                      </Link>
-
-                      <div className="my-1 border-t border-slate-100 dark:border-slate-800"></div>
-
-                      {/* Logout Button */}
-                      <button
-                        onClick={() => {
-                          handleLogout();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-small text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-body">
-                          logout
-                        </span>
-                        Đăng xuất
-                      </button>
-                    </div>
-                  )}
+                  </Link>
                 </div>
               </div>
             ) : (

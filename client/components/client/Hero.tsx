@@ -1,11 +1,12 @@
 
 //services
 import Link from "next/link";
+import { PlayCircle, TrendingUp } from "lucide-react";
 export default function Hero() {
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden bg-background-light dark:bg-background-dark">
       <div className="wrapper wrapper--lg relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="flex flex-col gap-6">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-smallest font-bold bg-primary/10 text-primary dark:bg-white/10 dark:text-slate-100 w-fit">
               Nền tảng đầu tư hàng đầu Việt Nam
@@ -25,10 +26,6 @@ export default function Hero() {
               >
                 Khám phá dự án
               </Link>
-              <button className="px-8 py-4 bg-white dark:bg-white/5 border border-primary/10 font-bold rounded-xl flex items-center gap-2">
-                <span className="material-symbols-outlined">play_circle</span>{" "}
-                Xem quy trình
-              </button>
             </div>
           </div>
           <div className="relative">
@@ -43,9 +40,7 @@ export default function Hero() {
                     +24.5%
                   </p>
                 </div>
-                <span className="material-symbols-outlined !text-h3 text-green-500">
-                  trending_up
-                </span>
+                <TrendingUp className="text-h3 text-green-500" />
               </div>
             </div>
           </div>
