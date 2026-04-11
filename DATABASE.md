@@ -8,6 +8,9 @@ CREATE TABLE users (
     balance DECIMAL(15, 2) DEFAULT 0.00,
     avatar_url VARCHAR(255),
     is_verified TINYINT(1) DEFAULT 0,
+    bio TEXT NULL,
+    cover_photo_url VARCHAR(255) NULL,
+    social_links JSON NULL,
     notification_settings JSON NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -50,7 +53,7 @@ CREATE TABLE projects (
 
 -- 4. Table: project_media
 CREATE TABLE project_media (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     project_id BIGINT UNSIGNED NOT NULL,
     url VARCHAR(255) NOT NULL,
     type ENUM('image', 'video') DEFAULT 'image',
@@ -61,7 +64,7 @@ CREATE TABLE project_media (
 
 -- 5. Table: project_milestones
 CREATE TABLE project_milestones (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     project_id BIGINT UNSIGNED NOT NULL,
     title VARCHAR(255) NOT NULL,
     percentage INT NOT NULL,
@@ -87,7 +90,7 @@ CREATE TABLE investments (
 
 -- 7. Table: payment_schedules
 CREATE TABLE payment_schedules (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     investment_id BIGINT UNSIGNED NOT NULL,
     due_date DATE NOT NULL,
     amount DECIMAL(15, 2) NOT NULL,
@@ -111,7 +114,7 @@ CREATE TABLE transactions (
 
 -- 9. Table: project_disputes
 CREATE TABLE project_disputes (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     project_id BIGINT UNSIGNED NOT NULL,
     user_id BIGINT UNSIGNED NOT NULL,
     reason TEXT NOT NULL,
@@ -142,7 +145,7 @@ CREATE TABLE user_blacklist_categories (
 
 -- 12. Table: notifications
 CREATE TABLE notifications (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     message TEXT NOT NULL,
     type ENUM('PROJECT_UPDATE', 'INVESTMENT_RECEIVED', 'PAYMENT_SUCCESS', 'SYSTEM') DEFAULT 'SYSTEM',
@@ -153,7 +156,7 @@ CREATE TABLE notifications (
 
 -- 13. Table: chat_history
 CREATE TABLE chat_history (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     role ENUM('user', 'model', 'system') NOT NULL,
     message TEXT NOT NULL,
@@ -165,7 +168,7 @@ CREATE TABLE chat_history (
 
 -- 14. Table: user_media
 CREATE TABLE user_media (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT UNSIGNED NOT NULL,
     url VARCHAR(1024) NOT NULL,
     public_id VARCHAR(255) NOT NULL,
