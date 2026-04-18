@@ -22,6 +22,8 @@ import { IsInvestorGuard } from '../../common/guards/is-investor.guard';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../common/guards/optional-auth.guard';
+import { AccountStatusGuard } from '../../common/guards/account-status.guard';
+
 
 @Controller('projects')
 export class ProjectsController {
@@ -101,8 +103,9 @@ export class ProjectsController {
     return this.projectsService.getProjectDetail(id);
   }
 
-  @UseGuards(JwtAuthGuard, IsOwnerGuard)
+  @UseGuards(JwtAuthGuard, IsOwnerGuard, AccountStatusGuard)
   @Post()
+
   createProject(
     @GetUser('id') ownerId: number,
     @Body() dto: CreateProjectDto,
@@ -110,14 +113,16 @@ export class ProjectsController {
     return this.projectsService.createProject(ownerId, dto);
   }
 
-  @UseGuards(JwtAuthGuard, IsOwnerGuard)
+  @UseGuards(JwtAuthGuard, IsOwnerGuard, AccountStatusGuard)
   @Delete(':id')
+
   deleteProject(@Param('id', ParseIntPipe) id: number) {
     return this.projectsService.deleteProject(id);
   }
 
-  @UseGuards(JwtAuthGuard, IsOwnerGuard)
+  @UseGuards(JwtAuthGuard, IsOwnerGuard, AccountStatusGuard)
   @Put(':id')
+
   updateProject(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('id') ownerId: number,
@@ -126,8 +131,9 @@ export class ProjectsController {
     return this.projectsService.updateProject(id, ownerId, dto);
   }
 
-  @UseGuards(JwtAuthGuard, IsOwnerGuard)
+  @UseGuards(JwtAuthGuard, IsOwnerGuard, AccountStatusGuard)
   @Put(':id/stop-funding')
+
   stopFunding(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('id') ownerId: number,
@@ -135,8 +141,9 @@ export class ProjectsController {
     return this.projectsService.stopFunding(id, ownerId);
   }
 
-  @UseGuards(JwtAuthGuard, IsInvestorGuard)
+  @UseGuards(JwtAuthGuard, IsInvestorGuard, AccountStatusGuard)
   @Post('invest')
+
   investInProject(
     @GetUser('id') userId: number,
     @Body() dto: InvestProjectDto,
@@ -144,20 +151,67 @@ export class ProjectsController {
     return this.projectsService.invest(userId, dto);
   }
 
-  @UseGuards(JwtAuthGuard, IsOwnerGuard)
+  @UseGuards(JwtAuthGuard, IsOwnerGuard, AccountStatusGuard)
   @Patch(':id/milestones/:mId/proof')
+
   uploadMilestoneProof(
     @Param('id', ParseIntPipe) id: number,
     @Param('mId', ParseIntPipe) mId: number,
     @GetUser('id') ownerId: number,
-    @Body('proofUrl') proofUrl: string,
+    @Body('evidenceUrls') evidenceUrls: string[],
   ) {
-    if (!proofUrl) throw new BadRequestException('proofUrl is required');
-    return this.projectsService.uploadMilestoneProof(id, mId, ownerId, proofUrl);
+    if (!evidenceUrls || evidenceUrls.length === 0)
+      throw new BadRequestException('At least one evidence URL is required');
+    return this.projectsService.uploadMilestoneProof(
+      id,
+      mId,
+      ownerId,
+      evidenceUrls,
+    );
   }
 
-  @UseGuards(JwtAuthGuard, IsInvestorGuard)
+  @UseGuards(JwtAuthGuard, AccountStatusGuard) // Only owner of the project can start voting
+  @Post('milestones/:mId/start-voting')
+
+  startMilestoneVoting(
+    @Param('mId', ParseIntPipe) mId: number,
+    @GetUser('id') userId: number,
+  ) {
+    return this.projectsService.startMilestoneVoting(mId, userId);
+  }
+
+  @UseGuards(JwtAuthGuard, AccountStatusGuard) // Only investors of the project can vote
+  @Post('milestones/:mId/vote')
+
+  submitVote(
+    @Param('mId', ParseIntPipe) mId: number,
+    @GetUser('id') userId: number,
+    @Body('isApprove') isApprove: boolean,
+    @Body('comment') comment?: string,
+  ) {
+    return this.projectsService.submitVote(userId, mId, isApprove, comment);
+  }
+
+  @UseGuards(JwtAuthGuard, AccountStatusGuard)
+  @Post('milestones/:mId/response')
+
+  ownerMilestoneResponse(
+    @Param('mId', ParseIntPipe) mId: number,
+    @GetUser('id') userId: number,
+    @Body('content') content: string,
+  ) {
+    return this.projectsService.ownerMilestoneResponse(mId, userId, content);
+  }
+
+  @Get('milestones/:mId/discussions')
+  getMilestoneDiscussions(@Param('mId', ParseIntPipe) mId: number) {
+    return this.projectsService.getMilestoneDiscussions(mId);
+  }
+
+  @UseGuards(JwtAuthGuard, IsInvestorGuard, AccountStatusGuard)
   @Post(':id/disputes')
+
+
   createDispute(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('id') userId: number,
@@ -168,8 +222,10 @@ export class ProjectsController {
     return this.projectsService.createDispute(id, userId, reason, evidenceUrl);
   }
 
-  @UseGuards(JwtAuthGuard, IsOwnerGuard)
+
+  @UseGuards(JwtAuthGuard, IsOwnerGuard, AccountStatusGuard)
   @Put(':id/milestones')
+
   createOrUpdateMilestones(
     @Param('id', ParseIntPipe) id: number,
     @GetUser('id') ownerId: number,

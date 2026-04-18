@@ -13,6 +13,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
+import { ProjectStatus } from './entities/project.entity';
+import { GetUser } from '../../common/decorators/get-user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
@@ -20,9 +22,24 @@ import { UserRole } from '../users/entities/user.entity';
 export class AdminProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  @Get('funding-review')
+  getFundedReview() {
+    return this.projectsService.getProjectsByStatus(ProjectStatus.PENDING_ADMIN_REVIEW);
+  }
+
   @Get('pending')
   getPendingProjects() {
-    return this.projectsService.getPendingProjects();
+    return this.projectsService.getProjectsByStatus(ProjectStatus.PENDING);
+  }
+
+  @Patch(':id/approve-disbursement')
+  approveDisbursement(@Param('id', ParseIntPipe) id: number) {
+    return this.projectsService.approveFundedProject(id);
+  }
+
+  @Get('milestones/disputed')
+  getDisputedMilestones() {
+    return this.projectsService.getDisputedMilestones();
   }
 
   @Get('milestones/pending')
@@ -31,6 +48,7 @@ export class AdminProjectsController {
   }
 
   @Get('disputes')
+
   getFrozenProjects() {
     return this.projectsService.getFrozenProjects();
   }
@@ -69,5 +87,34 @@ export class AdminProjectsController {
   ) {
     return this.projectsService.resolveDisputes(id, action);
   }
+
+  @Post('milestones/:mId/feedback')
+  adminMilestoneFeedback(
+    @Param('mId', ParseIntPipe) mId: number,
+    @Body('content') content: string,
+    @GetUser('id') adminId: number,
+  ) {
+    return this.projectsService.adminMilestoneFeedback(mId, adminId, content);
+  }
+
+  @Post('milestones/:mId/reset-vote')
+  adminResetMilestoneVote(@Param('mId', ParseIntPipe) mId: number) {
+    return this.projectsService.adminResetMilestoneVote(mId);
+  }
+
+  @Post('milestones/:mId/simulate-time')
+  simulateMilestoneTime(@Param('mId', ParseIntPipe) mId: number) {
+    return this.projectsService.simulateMilestoneTime(mId);
+  }
+
+  @Post(':id/terminate')
+  adminTerminateProject(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('reason') reason: string,
+    @GetUser('id') adminId: number,
+  ) {
+    return this.projectsService.adminTerminateProject(id, adminId, reason);
+  }
 }
+
 

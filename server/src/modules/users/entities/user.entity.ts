@@ -9,12 +9,15 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  OneToOne,
 } from 'typeorm';
 import { ProjectCategoryEntity } from '../../projects/entities/category.entity';
 import { ProjectEntity } from '../../projects/entities/project.entity';
 import { InvestmentEntity } from '../../investments/entities/investment.entity';
 import { TransactionEntity } from '../../transactions/entities/transaction.entity';
 import { UserMediaEntity } from './user-media.entity';
+import { KycEntity } from './kyc.entity';
+
 
 // Cập nhật Enum để hỗ trợ 3 nhóm người dùng chính
 export enum UserRole {
@@ -129,6 +132,10 @@ export class UserEntity {
   @OneToMany(() => UserMediaEntity, (media) => media.user)
   media: UserMediaEntity[];
 
+  @OneToOne(() => KycEntity, (kyc) => kyc.user)
+  kyc: KycEntity;
+
+
   @Column({
     name: 'notification_settings',
     type: 'json',
@@ -141,4 +148,8 @@ export class UserEntity {
     investment_update: true,
     milestone_reached: true,
   };
+
+  @Column({ name: 'is_frozen', type: 'boolean', default: false })
+  isFrozen: boolean;
 }
+

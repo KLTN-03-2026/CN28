@@ -9,7 +9,13 @@ import { ProjectCategoryEntity } from './entities/category.entity';
 import { ProjectMediaEntity } from './entities/media.entity';
 import { ProjectMilestoneEntity } from './entities/milestone.entity';
 import { ProjectDisputeEntity } from './entities/dispute.entity';
+import { MilestoneVoteEntity } from './entities/vote.entity';
+import { MilestoneDiscussionEntity } from './entities/discussion.entity';
 import { AdminProjectsController } from './admin-projects.controller';
+import { TasksService } from './tasks.service';
+import { MilestonesService } from './milestones.service';
+import { VotingService } from './voting.service';
+
 import { NotificationsModule } from '../notifications/notifications.module';
 import { InvestmentsModule } from '../investments/investments.module';
 
@@ -21,7 +27,11 @@ import { InvestmentsModule } from '../investments/investments.module';
       ProjectMediaEntity,
       ProjectMilestoneEntity,
       ProjectDisputeEntity,
+      MilestoneVoteEntity,
+      MilestoneDiscussionEntity,
     ]),
+
+
     AuthModule,
     NotificationsModule,
     InvestmentsModule,
@@ -31,6 +41,7 @@ import { InvestmentsModule } from '../investments/investments.module';
     ProjectCategoriesController,
     AdminProjectsController,
   ],
-  providers: [ProjectsService],
+  providers: [ProjectsService, TasksService, MilestonesService, VotingService],
+  exports: [ProjectsService, MilestonesService, VotingService],
 })
 export class ProjectsModule {}

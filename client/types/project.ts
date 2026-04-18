@@ -22,10 +22,22 @@ export type ProjectOwner = {
 export type ProjectMilestone = {
   id: number;
   title: string;
+  content?: string | null;
   percentage: number;
   stage: number;
-  status: 'pending' | 'uploading_proof' | 'admin_review' | 'disbursed';
-  proofUrl: string | null;
+  status:
+    | "pending"
+    | "uploading_proof"
+    | "voting"
+    | "admin_review"
+    | "disbursed"
+    | "completed"
+    | "rejected"
+    | "disputed";
+  evidenceUrls?: string[] | null;
+  disbursementDate?: string | null;
+  votingEndsAt?: string | null;
+  nextDisbursementDate?: string | null;
   createdAt: string;
 };
 
@@ -34,7 +46,7 @@ export type ProjectDispute = {
   userId: number;
   reason: string;
   evidenceUrl: string | null;
-  status: 'open' | 'resolved' | 'refunded';
+  status: "open" | "resolved" | "refunded";
   createdAt: string;
 };
 
@@ -46,10 +58,12 @@ export type Project = {
   contentSlug?: string;
   targetCapital: number | string;
   currentCapital: number | string;
+  currentAmount?: number | string;
   fundingProgress: number;
   interestRate: number | string;
   durationMonths: number;
   status: string;
+  endDate?: string | null;
   category?: ProjectCategory | null;
   owner?: ProjectOwner | null;
 };
@@ -62,18 +76,21 @@ export type ProjectDetail = {
   images: string[];
   targetCapital: number | string;
   currentCapital: number | string;
+  currentAmount?: number | string;
   fundingProgress: number;
   interestRate: number | string;
   durationMonths: number;
   minInvestment: number | string;
   status: string;
   endDate: string | null;
+  totalDebt?: number | string;
   content: string | null;
   category?: ProjectCategory | null;
   owner?: ProjectOwner | null;
   isFrozen?: boolean;
   milestones?: ProjectMilestone[];
   disputes?: ProjectDispute[];
+  createdAt: string;
 };
 
 export type PendingProject = {

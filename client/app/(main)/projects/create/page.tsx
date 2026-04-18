@@ -41,11 +41,20 @@ export default function CreateProjectPage() {
   );
   const [startDate, setStartDate] = useState(getTodayString());
   const [endDate, setEndDate] = useState("");
+  const [allowOverfunding, setAllowOverfunding] = useState(false);
   const [shortDescription, setShortDescription] = useState("");
   const [content, setContent] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [additionalImages, setAdditionalImages] = useState<string[]>([""]);
+  const [milestones, setMilestones] = useState<
+    { title: string; content: string; percentage: number; stage: number; intervalDays: number }[]
+  >([
+    { title: "Đợt 1: Khởi động", content: "", percentage: 20, stage: 1, intervalDays: 0 },
+    { title: "Đợt 2: Triển khai", content: "", percentage: 30, stage: 2, intervalDays: 30 },
+    { title: "Đợt 3: Hoàn thiện", content: "", percentage: 50, stage: 3, intervalDays: 30 },
+  ]);
   const contentSlug = slugify(title);
+
 
   // Media Library state
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
@@ -120,13 +129,20 @@ export default function CreateProjectPage() {
         endDate: endDate || undefined,
         status: "pending",
         contentSlug,
+        allowOverfunding,
         shortDescription,
         content,
         thumbnailUrl,
         additional_images: additionalImages
           .map((item) => item.trim())
           .filter((item) => item.length > 0),
+        milestones: milestones.map((m) => ({
+          ...m,
+          percentage: Number(m.percentage),
+          intervalDays: Number(m.intervalDays),
+        })),
       };
+
 
       await api.post("/api/projects", payload);
 
@@ -335,6 +351,24 @@ export default function CreateProjectPage() {
             </div>
           </div>
 
+          <div className="flex items-center gap-4 p-4 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50">
+            <input
+              type="checkbox"
+              id="allowOverfunding"
+              checked={allowOverfunding}
+              onChange={(e) => setAllowOverfunding(e.target.checked)}
+              className="w-5 h-5 rounded border-slate-300 text-primary focus:ring-primary"
+            />
+            <div>
+              <label htmlFor="allowOverfunding" className="text-small font-bold text-slate-900 dark:text-white cursor-pointer">
+                Cho phép đầu tư vượt mục tiêu (Overfunding)
+              </label>
+              <p className="text-[11px] text-slate-500">
+                Nếu bật, dự án tiếp tục nhận vốn đến ngày kết thúc. Nếu tắt, dự án sẽ đóng ngay khi đạt 100%.
+              </p>
+            </div>
+          </div>
+
           <div>
             <label className="block text-smaller font-semibold mb-2">
               Slug (tự động)
@@ -474,7 +508,89 @@ export default function CreateProjectPage() {
             )}
           </div>
 
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-body font-bold">Giai đoạn giải ngân (Milestones)</h3>
+                <p className="text-smaller text-slate-500">Thiết lập 2-5 đợt giải ngân. Tổng phải bằng 100%.</p>
+              </div>
+              <button
+                type="button"
+                disabled={milestones.length >= 5}
+                onClick={() => setMilestones(prev => [...prev, { title: `Đợt ${prev.length + 1}`, content: "", percentage: 0, stage: prev.length + 1, intervalDays: 30 }])}
+                className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-smaller font-bold disabled:opacity-50"
+              >
+                + Thêm đợt
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {milestones.map((m, index) => (
+                <div key={index} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-smaller font-bold text-primary">Đợt {m.stage}</span>
+                    {milestones.length > 2 && (
+                      <button
+                        type="button"
+                        onClick={() => setMilestones(prev => {
+                          const filtered = prev.filter((_, i) => i !== index);
+                          return filtered.map((item, i) => ({ ...item, stage: i + 1 }));
+                        })}
+                        className="text-red-500 text-smaller font-semibold"
+                      >
+                        Xóa đợt này
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="sm:col-span-2">
+                       <input
+                        placeholder="Tiêu đề đợt (VD: Khởi động dự án)"
+                        value={m.title}
+                        onChange={e => setMilestones(prev => prev.map((item, i) => i === index ? { ...item, title: e.target.value } : item))}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-small"
+                      />
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        placeholder="% vốn"
+                        value={m.percentage}
+                        onChange={e => setMilestones(prev => prev.map((item, i) => i === index ? { ...item, percentage: Number(e.target.value) } : item))}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-small pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-small">%</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        placeholder="Ngày chờ"
+                        value={m.intervalDays}
+                        onChange={e => setMilestones(prev => prev.map((item, i) => i === index ? { ...item, intervalDays: Number(e.target.value) } : item))}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-small pr-12"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]">ngày</span>
+                    </div>
+                  </div>
+                  <textarea
+                    placeholder="Mô tả công việc dự kiến cho giai đoạn này..."
+                    value={m.content}
+                    onChange={e => setMilestones(prev => prev.map((item, i) => i === index ? { ...item, content: e.target.value } : item))}
+                    rows={2}
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-small"
+                  />
+                </div>
+              ))}
+              <div className="flex justify-end pr-2">
+                <span className={`text-small font-bold ${milestones.reduce((s, m) => s + m.percentage, 0) === 100 ? 'text-green-600' : 'text-red-500'}`}>
+                  Tổng cộng: {milestones.reduce((s, m) => s + m.percentage, 0)}%
+                </span>
+              </div>
+            </div>
+          </div>
+
           <button
+
             type="submit"
             disabled={submitting || loadingCategories || hasNoCategories}
             className="px-6 py-2 rounded-lg bg-primary text-white font-bold disabled:opacity-60"
