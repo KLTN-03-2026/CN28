@@ -1,0 +1,241 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/axios";
+import { formatVnd } from "@/lib/utils";
+import { Project } from "@/types/project";
+import toast from "react-hot-toast";
+import { Check, X, ShieldCheck } from "lucide-react";
+
+type AdminProjectRow = Project & {
+  goalAmount?: number | string;
+};
+
+export default function ProjectApprovals() {
+  const {
+    data: pendingProjects = [],
+    refetch: refetchPending,
+    isLoading: loadingPending,
+  } = useQuery({
+    queryKey: ["admin-pending-projects"],
+    queryFn: async () =>
+      (await api.get<AdminProjectRow[]>("/api/admin/projects/pending")).data,
+  });
+
+  const {
+    data: fundedReview = [],
+    refetch: refetchFunded,
+    isLoading: loadingFunded,
+  } = useQuery({
+    queryKey: ["admin-funded-review"],
+    queryFn: async () =>
+      (
+        await api.get<AdminProjectRow[]>("/api/admin/projects/funding-review")
+      ).data,
+  });
+
+  const approve = async (id: number) => {
+    try {
+      await api.patch(`/api/admin/projects/${id}/approve`);
+      toast.success("Dự án đã được duyệt thành công.");
+      refetchPending();
+    } catch (err) {
+      toast.error("Không thể duyệt dự án này.");
+    }
+  };
+
+  const approveDisbursement = async (id: number) => {
+    try {
+      await api.patch(`/api/admin/projects/${id}/approve-disbursement`);
+      toast.success("Đã duyệt và giải ngân đợt 1 thành công.");
+      refetchFunded();
+    } catch (err) {
+      toast.error("Không thể duyệt giải ngân đợt 1.");
+    }
+  };
+
+  const reject = async (id: number) => {
+    try {
+      await api.patch(`/api/admin/projects/${id}/reject`);
+      toast.success("Đã từ chối dự án.");
+      refetchPending();
+    } catch (err) {
+      toast.error("Không thể từ chối dự án này.");
+    }
+  };
+
+  if (loadingPending || loadingFunded)
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-10 bg-slate-100 dark:bg-slate-800 w-1/4 rounded-lg" />
+        <div className="h-64 bg-slate-100 dark:bg-slate-800 rounded-5" />
+      </div>
+    );
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div>
+        <h1 className="text-h3 font-bold text-slate-900 dark:text-white">
+          Duyệt dự án
+        </h1>
+        <p className="text-slate-600 dark:text-slate-400 text-body mt-1">
+          Quản lý và phê duyệt các yêu cầu huy động vốn mới.
+        </p>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-5 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800/50 flex justify-between items-center bg-slate-50/50 dark:bg-white/5">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            Dự án mới chờ duyệt
+          </h2>
+          <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 text-[11px] font-bold uppercase tracking-widest">
+            {pendingProjects.length} Pending
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50/50 dark:bg-slate-800/20 text-[11px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100 dark:border-slate-800">
+              <tr>
+                <th className="px-6 py-4">Dự án</th>
+                <th className="px-6 py-4">Chủ sở hữu</th>
+                <th className="px-6 py-4">Mục tiêu vốn</th>
+                <th className="px-6 py-4 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {pendingProjects.map((p) => (
+                <tr
+                  key={p.id}
+                  className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group"
+                >
+                  <td className="px-6 py-4">
+                    <p className="text-smaller font-bold text-slate-900 dark:text-white truncate max-w-[20rem]">
+                      {p.title}
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1 italic">
+                      Tạo ngày:{" "}
+                      {new Date(p.createdAt).toLocaleDateString("vi-VN")}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[11px] font-bold uppercase">
+                        {p.owner?.fullName?.charAt(0)}
+                      </div>
+                      <p className="text-smaller font-bold text-slate-700 dark:text-slate-200">
+                        {p.owner?.fullName}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-smaller font-extrabold text-primary">
+                      {formatVnd(Number(p.goalAmount))}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => approve(p.id)}
+                        className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-emerald-500 text-white text-[11px] font-bold hover:shadow-lg transition-all"
+                      >
+                        <Check className="text-small" />
+                        Duyệt
+                      </button>
+                      <button
+                        onClick={() => reject(p.id)}
+                        className="flex items-center gap-2 px-4 py-1.5 rounded-lg border border-red-200 text-red-500 text-[11px] font-bold hover:bg-red-50 transition-all"
+                      >
+                        <X className="text-small" />
+                        Từ chối
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {pendingProjects.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="px-6 py-12 text-center text-slate-500 text-smaller"
+                  >
+                    <ShieldCheck className="text-h1 text-slate-200 mb-4 scale-150 mx-auto" />
+                    <p className="mt-4">Không có dự án nào chờ duyệt.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {/* Section 2: Funded Projects Awaiting 1st Disbursement */}
+      <div className="bg-white dark:bg-slate-900 rounded-5 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800/50 flex justify-between items-center bg-indigo-50/30 dark:bg-indigo-900/10">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span className="size-2 rounded-full bg-indigo-500 animate-pulse"></span>
+            Dự án đã đủ vốn - Chờ duyệt giải ngân đợt 1
+          </h2>
+          <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 text-[11px] font-bold uppercase tracking-widest">
+            {fundedReview.length} Review
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50/50 dark:bg-slate-800/20 text-[11px] uppercase text-slate-400 font-bold tracking-widest border-b border-slate-100 dark:border-slate-800">
+              <tr>
+                <th className="px-6 py-4">Dự án</th>
+                <th className="px-6 py-4">Chủ dự án</th>
+                <th className="px-6 py-4">Vốn đạt được</th>
+                <th className="px-6 py-4 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {fundedReview.map((p) => (
+                <tr
+                  key={p.id}
+                  className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group"
+                >
+                  <td className="px-6 py-4">
+                    <p className="text-smaller font-bold text-slate-900 dark:text-white">
+                      {p.title}
+                    </p>
+                    <p className="text-[10px] text-indigo-500 font-semibold mt-1">
+                      Hoàn thành gọi vốn: {p.fundingProgress}%
+                    </p>
+                  </td>
+                  <td className="px-6 py-4 text-smaller font-medium text-slate-600 dark:text-slate-400">
+                    {p.owner?.fullName}
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-smaller font-extrabold text-emerald-600">
+                      {formatVnd(Number(p.currentAmount))}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      onClick={() => approveDisbursement(p.id)}
+                      className="px-4 py-1.5 rounded-lg bg-indigo-600 text-white text-[11px] font-bold hover:bg-indigo-700 transition-all shadow-sm"
+                    >
+                      Duyệt & Giải ngân đợt 1
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {fundedReview.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="px-6 py-12 text-center text-slate-500 text-smaller italic"
+                  >
+                    Chưa có dự án nào hoàn thành gọi vốn chờ duyệt.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
