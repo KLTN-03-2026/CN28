@@ -1,12 +1,13 @@
 import { Project } from "@/types/project";
 import { UserProfile } from "@/types/user";
+import { ProjectMilestone } from "@/types/project";
 
 export type OwnerProject = Project & {
   investorsCount: number;
   netAfterFeeEstimate: number;
   currentAmount?: number | string;
   fundingProgress?: number;
-  milestones?: any[]; // Simplified for now but could be ProjectMilestone[]
+  milestones?: ProjectMilestone[];
 };
 
 export type PaginationProps = {

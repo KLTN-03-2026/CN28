@@ -1,4 +1,11 @@
-import { IsArray, IsNumber, IsOptional, IsString, IsObject, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SocialLinksDto {
@@ -46,4 +53,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsNumber({}, { each: true })
   blacklistCategoryIds?: number[];
+
+  @IsString()
+  @IsOptional()
+  address?: string;
 }

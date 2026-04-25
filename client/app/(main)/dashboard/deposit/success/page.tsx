@@ -1,7 +1,7 @@
 "use client";
 import { Suspense } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
@@ -12,7 +12,6 @@ function DepositSuccessInner() {
   const status = searchParams.get("status");
   const code = searchParams.get("code");
   const amount = searchParams.get("amount");
-  const [showToast, setShowToast] = useState(false);
 
   const isSuccess = status === "success";
 
@@ -21,23 +20,16 @@ function DepositSuccessInner() {
       return;
     }
 
-    setShowToast(true);
     window.dispatchEvent(new Event("auth-changed"));
     router.refresh();
-
-    const timer = window.setTimeout(() => {
-      setShowToast(false);
-    }, 3000);
-
-    return () => window.clearTimeout(timer);
   }, [isSuccess, router]);
 
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen font-display">
       <Navbar />
       <main className="wrapper wrapper--sm py-16">
-        {showToast ? (
-          <div className="fixed top-20 right-6 z-[60] rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-small font-semibold text-green-700 shadow-lg">
+        {isSuccess ? (
+          <div className="fixed top-20 right-6 z-60 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-small font-semibold text-green-700 shadow-lg">
             Nạp tiền thành công, số dư đã được cập nhật.
           </div>
         ) : null}

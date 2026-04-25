@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
+import "../styles/tailwind.css";
 import "../styles/theme.scss";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { NotificationProvider } from "@/components/providers/NotificationProvider";
 import { SWRegistration } from "@/components/providers/SWRegistration";
 import AIChatbox from "@/components/client/AIChatbox";
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
-import { Toaster } from 'sonner';
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 

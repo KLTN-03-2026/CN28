@@ -5,7 +5,7 @@ import { RotateCcw, Mail, ArrowRight, ArrowLeft } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="min-h-screen flex flex-col font-display antialiased bg-[#f6f7f8] dark:bg-[#0a172e] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col font-display antialiased bg-background-light dark:bg-[#0a172e] transition-colors duration-300">
       {/* Background Texture (Tạo hiệu ứng chấm nhỏ như template) */}
       <div
         className="fixed inset-0 pointer-events-none opacity-50 dark:opacity-20"
@@ -47,11 +47,11 @@ export default function ForgotPasswordPage() {
         </div>
       </header>
 
-      <main className="flex-grow flex items-center justify-center px-4 py-24 relative z-10">
-        <div className="w-full max-w-[440px]">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl dark:shadow-2xl overflow-hidden p-8 md:p-10 border border-slate-100 dark:border-white/5">
+      <main className="grow flex items-center justify-center px-4 py-24 relative z-10">
+        <div className="w-full max-w-[44.4rem]">
+          <div className="bg-white dark:bg-slate-900 rounded-5 shadow-xl dark:shadow-2xl overflow-hidden p-8 md:p-10 border border-slate-100 dark:border-white/5">
             <div className="flex flex-col items-center mb-10 text-center">
-              <div className="w-14 h-14 bg-primary/5 dark:bg-white/5 flex items-center justify-center rounded-2xl mb-6 border border-primary/10 dark:border-white/10">
+              <div className="w-14 h-14 bg-primary/5 dark:bg-white/5 flex items-center justify-center rounded-5 mb-6 border border-primary/10 dark:border-white/10">
                 <RotateCcw className="text-primary dark:text-white text-3xl" />
               </div>
               <h1 className="text-h4 font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors">
-                  <Mail className="text-body" />
+                    <Mail className="text-body" />
                   </div>
                   <input
                     className="block w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-slate-900 dark:text-white text-small ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all placeholder:text-slate-400"

@@ -5,12 +5,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
-import { Rocket, User, Mail, Lock, Eye, EyeOff, ArrowLeft, ArrowRight } from "lucide-react";
+import { getErrorMessage } from "@/lib/utils";
+import {
+  Rocket,
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 
 export default function RegisterPage() {
+  type ProjectCategory = {
+    id: number;
+    name: string;
+  };
+
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState(1);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<ProjectCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
 
   // Form state
@@ -67,11 +82,8 @@ export default function RegisterPage() {
           router.push("/login");
         }, 2000);
       }
-    } catch (err: any) {
-      // Handle different error types
-      const message =
-        err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
-      setError(Array.isArray(message) ? message[0] : message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Đăng ký thất bại. Vui lòng thử lại."));
     } finally {
       setIsLoading(false);
     }
@@ -261,8 +273,8 @@ export default function RegisterPage() {
                         htmlFor="investor"
                         className="text-small text-slate-700 dark:text-slate-300 cursor-pointer"
                       >
-                        <span className="font-semibold">Nhà đầu tư</span> - Tôi muốn
-                        đầu tư vào các dự án
+                        <span className="font-semibold">Nhà đầu tư</span> - Tôi
+                        muốn đầu tư vào các dự án
                       </label>
                     </div>
                     <div className="flex items-center gap-3">
@@ -279,8 +291,8 @@ export default function RegisterPage() {
                         htmlFor="owner"
                         className="text-small text-slate-700 dark:text-slate-300 cursor-pointer"
                       >
-                        <span className="font-semibold">Chủ dự án</span> - Tôi muốn
-                        huy động vốn cho dự án của mình
+                        <span className="font-semibold">Chủ dự án</span> - Tôi
+                        muốn huy động vốn cho dự án của mình
                       </label>
                     </div>
                   </div>
@@ -338,7 +350,9 @@ export default function RegisterPage() {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((category) => {
-                      const isSelected = selectedCategoryIds.includes(category.id);
+                      const isSelected = selectedCategoryIds.includes(
+                        category.id,
+                      );
                       return (
                         <button
                           key={category.id}
@@ -346,7 +360,7 @@ export default function RegisterPage() {
                           onClick={() => {
                             if (isSelected) {
                               setSelectedCategoryIds((prev) =>
-                                prev.filter((id) => id !== category.id)
+                                prev.filter((id) => id !== category.id),
                               );
                             } else {
                               setSelectedCategoryIds((prev) => [
@@ -355,10 +369,11 @@ export default function RegisterPage() {
                               ]);
                             }
                           }}
-                          className={`px-4 py-2 rounded-full border text-small font-semibold transition-all ${isSelected
+                          className={`px-4 py-2 rounded-full border text-small font-semibold transition-all ${
+                            isSelected
                               ? "bg-primary border-primary text-white"
                               : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary/50"
-                            }`}
+                          }`}
                         >
                           {category.name}
                         </button>
@@ -370,8 +385,9 @@ export default function RegisterPage() {
             )}
             {/* Submit Button */}
             <button
-              className={`w-full bg-primary text-white font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 group ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"
-                }`}
+              className={`w-full bg-primary text-white font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 group ${
+                isLoading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"
+              }`}
               type="submit"
               disabled={isLoading}
             >

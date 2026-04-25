@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Navbar from "@/components/client/Navbar";
 import api from "@/lib/axios";
+import { getErrorMessage } from "@/lib/utils";
 import { Rocket, Eye, EyeOff } from "lucide-react";
 
 import { decodeJwt } from "jose";
@@ -47,10 +48,12 @@ export default function LoginPage() {
 
         // Giải mã token để lấy role và chuyển hướng phù hợp
         try {
-          const payload = decodeJwt(response.data.access_token) as { role?: string };
+          const payload = decodeJwt(response.data.access_token) as {
+            role?: string;
+          };
           const role = payload.role?.toLowerCase();
-          
-          if (role === 'admin') {
+
+          if (role === "admin") {
             router.push("/admin-dashboard");
           } else {
             router.push("/dashboard");
@@ -58,14 +61,11 @@ export default function LoginPage() {
         } catch (e) {
           router.push("/dashboard");
         }
-        
+
         router.refresh(); // Làm mới dữ liệu route
       }
-    } catch (err: any) {
-      // Xử lý lỗi từ NestJS trả về
-      const message =
-        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.";
-      setError(Array.isArray(message) ? message[0] : message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Đăng nhập thất bại. Vui lòng thử lại."));
     } finally {
       setIsLoading(false);
     }

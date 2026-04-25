@@ -8,6 +8,7 @@ import { UserEntity } from '../users/entities/user.entity';
 import { ProjectEntity } from '../projects/entities/project.entity';
 import { TransactionEntity } from '../transactions/entities/transaction.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
       ProjectEntity,
       TransactionEntity,
     ]),
+    UsersModule,
     NotificationsModule,
   ],
   controllers: [InvestmentsController],

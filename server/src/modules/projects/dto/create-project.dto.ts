@@ -44,7 +44,6 @@ export class CreateMilestoneDto {
   intervalDays?: number;
 }
 
-
 export class CreateProjectDto {
   @IsString()
   @MaxLength(255)
@@ -115,6 +114,11 @@ export class CreateProjectDto {
   additional_images?: string[];
 
   @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  address?: string;
+
+  @IsOptional()
   @IsBoolean()
   allowOverfunding?: boolean;
 
@@ -124,4 +128,3 @@ export class CreateProjectDto {
   @Type(() => CreateMilestoneDto)
   milestones?: CreateMilestoneDto[];
 }
-
